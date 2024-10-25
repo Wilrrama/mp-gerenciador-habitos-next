@@ -1,23 +1,14 @@
 import DayState from "@/components/DayState";
+import { kv } from "@vercel/kv";
 import Image from "next/image";
 import Link from "next/link";
-export default function Home() {
-  const habits = {
-    exercícios: {
-      "2024-10-14": false,
-      "2024-10-15": true,
-      "2024-10-16": true,
-      "2024-10-17": true,
-      "2024-10-18": true,
-    },
-    leitura: {
-      "2024-10-14": false,
-      "2024-10-15": true,
-      "2024-10-16": true,
-      "2024-10-17": true,
-      "2024-10-18": true,
-    },
-  };
+
+type Habits = {
+  [habit: string]: Record<string, boolean>;
+} | null;
+
+export default async function Home() {
+  const habits: Habits = await kv.hgetall("habits");
 
   const today = new Date();
   const todayWeekDay = today.getDay();
@@ -26,6 +17,16 @@ export default function Home() {
   const sortedWeekDays = weekDays
     .slice(todayWeekDay + 1)
     .concat(weekDays.slice(0, todayWeekDay + 1));
+
+  const last7Days = weekDays
+    .map((_, index) => {
+      const date = new Date();
+      date.setDate(date.getDate() - index);
+      return date.toISOString().slice(0, 10);
+    })
+    .reverse();
+
+  console.log(last7Days);
 
   return (
     <main className="container relative flex flex-col gap-8 px-4 pt-16">
@@ -51,16 +52,18 @@ export default function Home() {
                 />
               </button>
             </div>
-            <section className="grid grid-cols-7 bg-neutral-800 rounded-md p-2">
-              {sortedWeekDays.map((day) => (
-                <div key={day} className="flex flex-col last:font-bold">
-                  <span className="font-sans text-xs text-white text-center">
-                    {day}
-                  </span>
-                  <DayState day={undefined} />
-                </div>
-              ))}
-            </section>
+            <Link href={`habito/${habit}`}>
+              <section className="grid grid-cols-7 bg-neutral-800 rounded-md p-2">
+                {sortedWeekDays.map((day, index) => (
+                  <div key={day} className="flex flex-col last:font-bold">
+                    <span className="font-sans text-xs text-white text-center">
+                      {day}
+                    </span>
+                    <DayState day={habitStreak[last7Days[index]]} />
+                  </div>
+                ))}
+              </section>
+            </Link>
           </div>
         ))}
 
