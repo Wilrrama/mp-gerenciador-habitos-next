@@ -1,9 +1,9 @@
 import DayState from "@/components/DayState";
 import { kv } from "@vercel/kv";
-import Image from "next/image";
 import Link from "next/link";
+import DeleteButton from "@/components/DeleteButton";
 
-type Habits = {
+export type Habits = {
   [habit: string]: Record<string, boolean>;
 } | null;
 
@@ -43,14 +43,7 @@ export default async function Home() {
               <span className="text-xl font-light text-white font-sans">
                 {habit}
               </span>
-              <button>
-                <Image
-                  src="/images/trash.svg"
-                  width={20}
-                  height={20}
-                  alt="ìcone de lixeira vermelha"
-                />
-              </button>
+              <DeleteButton habit={habit} />
             </div>
             <Link href={`habito/${habit}`}>
               <section className="grid grid-cols-7 bg-neutral-800 rounded-md p-2">

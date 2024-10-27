@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import ArrowIcon from "./ArrowIcon";
+import DayState from "./DayState";
+import { toggleHabit } from "@/app/actions";
 
 function getDaysInMonth(month: number, year: number) {
   const date = new Date(year, month, 1);
@@ -15,13 +17,19 @@ function getDaysInMonth(month: number, year: number) {
 }
 
 const currentDate = new Date();
-const currentDay = currentDate.getDate();
+// const currentDay = currentDate.getDate();
 const currentMonth = currentDate.getMonth();
 const currentYear = currentDate.getFullYear();
 
 const weekDays = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sab"];
 
-function Calendar() {
+function Calendar({
+  habit,
+  habitStreak,
+}: {
+  habit: string;
+  habitStreak: Record<string, boolean> | null;
+}) {
   const [month, setMonth] = useState(currentMonth);
   const [year, setYear] = useState(currentYear);
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -62,6 +70,13 @@ function Calendar() {
     return `${upperCaseMonthName}  de ${selectedDate.getFullYear()}`;
   }
 
+  function getDayString(day: Date) {
+    return `${year.toString()}-${(month + 1).toString().padStart(2, "0")}-${day
+      .getDate()
+      .toString()
+      .padStart(2, "0")}`;
+  }
+
   return (
     <section className="w-full my-2 rounded-md bg-neutral-800">
       <div className="flex justify-between mx-2 my-4 font-sans text-neutral-400">
@@ -86,10 +101,26 @@ function Calendar() {
           </div>
         ))}
         {daysInMonth.map((day, index) => (
-          <div key={index} className="flex flex-col items-center p-2">
+          <div
+            key={index}
+            className="flex flex-col items-center p-2"
+            onClick={() =>
+              toggleHabit({
+                habit,
+                habitStreak,
+                date: getDayString(day),
+                done: habitStreak ? habitStreak[getDayString(day)] : true,
+              })
+            }
+          >
             <span className="font-sans text-xs font-light text-neutral-400">
               {day?.getDate()}
             </span>
+            {day && (
+              <DayState
+                day={habitStreak ? habitStreak[getDayString(day)] : undefined}
+              />
+            )}
           </div>
         ))}
       </div>
